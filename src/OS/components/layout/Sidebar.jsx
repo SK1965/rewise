@@ -182,12 +182,7 @@ const Sidebar = ({ activeSection, setActiveSection, onWidthChange }) => {
                             )}
                             
                             {/* Tooltip for collapsed state */}
-                            {!isCollapsed && !isMobile && (
-                                <div className="absolute left-full ml-2 px-3 py-2 bg-slate-700 text-white text-sm rounded-lg 
-                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
-                                    {item.label}
-                                </div>
-                            )}
+                            
                         </a>
                     ))}
                 </nav>

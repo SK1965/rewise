@@ -142,7 +142,7 @@ const MainHomePage = () => {
                     <div className="mb-8">
                         <span className="text-6xl animate-bounce inline-block">🚀</span>
                         <h1 className="text-4xl md:text-6xl font-extrabold mt-4 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-                            StudyVerse
+                            rewisely
                         </h1>
                     </div>
                     <div className="w-80 h-1 bg-white/20 rounded-full overflow-hidden">
@@ -173,7 +173,7 @@ const MainHomePage = () => {
                     <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white mb-6 leading-tight">
                         Welcome to{' '}
                         <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent animate-pulse">
-                            StudyVerse
+                            rewisely
                         </span>
                         <span className="inline-block ml-2 animate-bounce">👋</span>
                     </h1>

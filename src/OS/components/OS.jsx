@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Sidebar from './layout/Sidebar';
 import Introduction from './sections/Introduction';
 import ProcessThreads from './sections/ProcessThreads';
@@ -9,11 +9,24 @@ import MemoryManagement from './sections/MemoryManagement';
 import FileSystem from './sections/FileSystem';
 import IOSystems from './sections/IOSystems';
 import Virtualization from './sections/Virtualization';
-//import '../styles/main.css';
 import '../styles/animations.css';
 
 export default function Os() {
     const [activeSection, setActiveSection] = useState('intro');
+    const [sidebarWidth, setSidebarWidth] = useState(280);
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Check if mobile on mount and resize
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         const hash = window.location.hash.substring(1);
@@ -21,6 +34,26 @@ export default function Os() {
             setActiveSection(hash);
         }
     }, []);
+
+    // Handle sidebar width changes
+    const handleSidebarWidthChange = useCallback((width, collapsed) => {
+        setSidebarWidth(width);
+        setIsCollapsed(collapsed);
+    }, []);
+
+    // Calculate dynamic margin based on sidebar state
+    const getMainContentStyle = () => {
+        // No margin on mobile (sidebar overlays)
+        if (isMobile) {
+            return { marginLeft: 0 };
+        }
+        
+        // Dynamic margin based on sidebar width on desktop
+        return { 
+            marginLeft: `${sidebarWidth}px`,
+            transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        };
+    };
 
     const renderSection = () => {
         switch (activeSection) {
@@ -38,13 +71,39 @@ export default function Os() {
     };
 
     return (
-        <div className="flex h-screen bg-slate-50">
-            <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
-            <main className="ml-64 flex-1 p-6 sm:p-8 md:p-12 overflow-y-auto">
-                <div className="max-w-6xl mx-auto">
-                    {renderSection()}
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+            <Suspense fallback={
+                <div className="flex h-screen items-center justify-center">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+                        <p className="text-slate-600 font-medium">Loading OS Study Guide...</p>
+                    </div>
                 </div>
-            </main>
+            }>
+                <Sidebar 
+                    activeSection={activeSection} 
+                    setActiveSection={setActiveSection}
+                    onWidthChange={handleSidebarWidthChange}
+                />
+                
+                {/* Main Content Area - Dynamically Positioned */}
+                <main 
+                    className="min-h-screen transition-all duration-300"
+                    style={getMainContentStyle()}
+                >
+                    {/* Mobile Header Spacer */}
+                    <div className="lg:hidden h-16"></div>
+                    
+                    {/* Content Container */}
+                    <div className="w-full min-h-screen">
+                        <div className="p-6 sm:p-8 md:p-12">
+                            <div className="max-w-6xl mx-auto">
+                                {renderSection()}
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </Suspense>
         </div>
     );
 }

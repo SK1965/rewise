@@ -133,3 +133,52 @@
         height: 40px;
     }
 }
+
+
+/* Add to your animations.css or create a separate file */
+
+/* Fix for collapsed sidebar tooltips */
+.nav-item-collapsed {
+    position: relative;
+    overflow: visible !important;
+}
+
+/* Enhanced tooltip with arrow */
+.tooltip-arrow::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: #374151; /* slate-700 */
+}
+
+/* Prevent tooltip from causing layout shifts */
+.sidebar-collapsed .nav-item:hover {
+    transform: none !important;
+}
+
+/* Ensure tooltips don't interfere with scrolling */
+.sidebar-collapsed {
+    overflow-x: visible !important;
+    overflow-y: auto;
+}
+
+/* Custom scrollbar for collapsed state */
+.sidebar-collapsed::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-collapsed::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-collapsed::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 3px;
+}
+
+.sidebar-collapsed::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}

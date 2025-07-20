@@ -1,11 +1,11 @@
-// src/components/layout/Sidebar.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-const Sidebar = ({ activeSection, setActiveSection }) => {
+const Sidebar = ({ activeSection, setActiveSection, onWidthChange }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [sidebarWidth, setSidebarWidth] = useState(280);
     const [isResizing, setIsResizing] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     const navItems = [
         { id: 'intro', label: 'Introduction', icon: '🖥️' },
@@ -19,26 +19,74 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
         { id: 'virtualization', label: 'Virtualization', icon: '☁️' },
     ];
 
-    // Handle resize functionality
-    const handleMouseDown = (e) => {
-        setIsResizing(true);
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-        e.preventDefault();
-    };
+    // Notify parent component of width changes - DEFINE FIRST
+    const notifyWidthChange = useCallback((width, collapsed) => {
+        if (onWidthChange) {
+            onWidthChange(collapsed ? 80 : width, collapsed);
+        }
+    }, [onWidthChange]);
 
-    const handleMouseMove = (e) => {
-        if (isResizing) {
+    // Get current sidebar width based on state
+    const getCurrentWidth = useCallback(() => {
+        if (isMobile) return 280; // Fixed mobile width
+        return isCollapsed ? 80 : sidebarWidth;
+    }, [isMobile, isCollapsed, sidebarWidth]);
+
+    // Check if mobile on mount and resize
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Notify parent of initial width - AFTER notifyWidthChange is defined
+    useEffect(() => {
+        notifyWidthChange(sidebarWidth, isCollapsed);
+    }, [notifyWidthChange, sidebarWidth, isCollapsed]);
+
+    // Handle resize functionality
+    const handleMouseDown = useCallback((e) => {
+        if (!isMobile && !isCollapsed) {
+            setIsResizing(true);
+            e.preventDefault();
+        }
+    }, [isMobile, isCollapsed]);
+
+    const handleMouseMove = useCallback((e) => {
+        if (isResizing && !isMobile) {
             const newWidth = Math.max(200, Math.min(400, e.clientX));
             setSidebarWidth(newWidth);
+            notifyWidthChange(newWidth, false);
         }
-    };
+    }, [isResizing, isMobile, notifyWidthChange]);
 
-    const handleMouseUp = () => {
+    const handleMouseUp = useCallback(() => {
         setIsResizing(false);
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-    };
+    }, []);
+
+    useEffect(() => {
+        if (isResizing) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            return () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            };
+        }
+    }, [isResizing, handleMouseMove, handleMouseUp]);
+
+    // Handle collapse/expand
+    const handleCollapseToggle = useCallback(() => {
+        if (!isMobile) {
+            const newCollapsed = !isCollapsed;
+            setIsCollapsed(newCollapsed);
+            notifyWidthChange(sidebarWidth, newCollapsed);
+        }
+    }, [isCollapsed, sidebarWidth, notifyWidthChange, isMobile]);
 
     // Close mobile menu when section changes
     useEffect(() => {
@@ -78,30 +126,31 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
                     fixed top-0 left-0 h-full bg-gradient-to-b from-slate-800 to-slate-900 text-slate-100 
                     flex flex-col shadow-xl transition-all duration-300 z-40
                     ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                    ${isCollapsed ? 'lg:w-20' : ''}
                 `}
                 style={{ 
-                    width: window.innerWidth >= 1024 ? (isCollapsed ? '80px' : `${sidebarWidth}px`) : '280px'
+                    width: `${getCurrentWidth()}px`
                 }}
             >
                 {/* Header */}
                 <div className="p-4 border-b border-slate-700 bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center justify-between">
                     <h1 className={`font-bold transition-all duration-300 ${
-                        isCollapsed ? 'text-lg' : 'text-xl lg:text-2xl'
+                        isCollapsed && !isMobile ? 'text-lg' : 'text-xl lg:text-2xl'
                     }`}>
-                        {isCollapsed ? '🚀' : 'OS Study Guide 🚀'}
+                        {isCollapsed && !isMobile ? '🚀' : 'OS Study Guide 🚀'}
                     </h1>
                     
                     {/* Desktop Collapse Button */}
-                    <button
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="hidden lg:block p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
-                        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                    >
-                        <span className="text-lg">
-                            {isCollapsed ? '→' : '←'}
-                        </span>
-                    </button>
+                    {!isMobile && (
+                        <button
+                            onClick={handleCollapseToggle}
+                            className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+                            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        >
+                            <span className="text-lg">
+                                {isCollapsed ? '→' : '←'}
+                            </span>
+                        </button>
+                    )}
                 </div>
 
                 {/* Navigation */}
@@ -121,19 +170,19 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
                                     ? 'bg-amber-500 text-white shadow-lg transform scale-105' 
                                     : 'hover:translate-x-2'
                                 }
-                                ${isCollapsed ? 'justify-center' : ''}
+                                ${isCollapsed && !isMobile ? 'justify-center' : ''}
                             `}
-                            title={isCollapsed ? item.label : ''}
+                            title={!isCollapsed && !isMobile ? item.label : ''}
                         >
                             <span className="text-xl flex-shrink-0">{item.icon}</span>
-                            {!isCollapsed && (
+                            {(!isCollapsed || isMobile) && (
                                 <span className="text-sm lg:text-base font-medium truncate">
                                     {item.label}
                                 </span>
                             )}
                             
                             {/* Tooltip for collapsed state */}
-                            {isCollapsed && (
+                            {!isCollapsed && !isMobile && (
                                 <div className="absolute left-full ml-2 px-3 py-2 bg-slate-700 text-white text-sm rounded-lg 
                                     opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
                                     {item.label}
@@ -146,15 +195,15 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
                 {/* Footer */}
                 <div className="p-4 border-t border-slate-700 text-center">
                     <div className="text-xs text-slate-400">
-                        {isCollapsed ? '🎯' : '🎯 Master OS Concepts'}
+                        {isCollapsed && !isMobile ? '🎯' : '🎯 Master OS Concepts'}
                     </div>
                 </div>
             </aside>
 
             {/* Resize Handle (Desktop only) */}
-            {!isCollapsed && (
+            {!isCollapsed && !isMobile && (
                 <div
-                    className="hidden lg:block fixed top-0 h-full w-1 bg-transparent hover:bg-amber-400 cursor-col-resize transition-colors z-50"
+                    className="fixed top-0 h-full w-1 bg-transparent hover:bg-amber-400 cursor-col-resize transition-colors z-50 resize-handle"
                     style={{ left: `${sidebarWidth - 2}px` }}
                     onMouseDown={handleMouseDown}
                 />

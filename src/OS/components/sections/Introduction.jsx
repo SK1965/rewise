@@ -2,6 +2,7 @@ import React from 'react';
 import AnimatedCard from '../animations/AnimatedCard';
 
 const Introduction = () => (
+    
     <>
         <div className="mb-8">
             <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">

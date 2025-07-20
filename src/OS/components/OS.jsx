@@ -17,6 +17,11 @@ export default function Os() {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
+    // Scroll to top when component mounts
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, []);
+
     // Check if mobile on mount and resize
     useEffect(() => {
         const checkMobile = () => {
@@ -39,6 +44,13 @@ export default function Os() {
     const handleSidebarWidthChange = useCallback((width, collapsed) => {
         setSidebarWidth(width);
         setIsCollapsed(collapsed);
+    }, []);
+
+    // Enhanced section change handler with scroll reset
+    const handleSectionChange = useCallback((section) => {
+        setActiveSection(section);
+        // Scroll to top when changing sections
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }, []);
 
     // Calculate dynamic margin based on sidebar state
@@ -82,7 +94,7 @@ export default function Os() {
             }>
                 <Sidebar 
                     activeSection={activeSection} 
-                    setActiveSection={setActiveSection}
+                    setActiveSection={handleSectionChange} // Use enhanced handler
                     onWidthChange={handleSidebarWidthChange}
                 />
                 

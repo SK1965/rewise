@@ -1,0 +1,135 @@
+/* Enhanced animations */
+@keyframes slide-in {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+}
+
+.animate-slide-in {
+    animation: slide-in 0.6s ease-out forwards;
+}
+
+.animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Navigation animations */
+.nav-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-item:hover {
+    transform: translateX(8px) scale(1.02);
+}
+
+/* Memory simulation styling */
+.page-frame {
+    width: 64px;
+    height: 64px;
+    border: 3px solid #cbd5e1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.125rem;
+    transition: all 0.4s ease;
+    background: white;
+}
+
+.page-frame.empty {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.page-frame.hit {
+    border-color: #10b981;
+    background: #d1fae5;
+    color: #065f46;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.page-frame.fault {
+    border-color: #ef4444;
+    background: #fee2e2;
+    color: #991b1b;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+/* Gantt chart styling */
+.gantt-block {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.875rem;
+    height: 48px;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.gantt-block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Utility classes */
+.success-text {
+    color: #10b981;
+    font-weight: bold;
+}
+
+.fail-text {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.current {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+@media (max-width: 768px) {
+    .nav-item {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .page-frame {
+        width: 48px;
+        height: 48px;
+        font-size: 1rem;
+    }
+    
+    .gantt-block {
+        font-size: 0.75rem;
+        height: 40px;
+    }
+}
